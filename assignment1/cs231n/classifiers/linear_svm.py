@@ -80,6 +80,8 @@ def svm_loss_vectorized(W, X, y, reg):
     # result in loss.                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    if X is None:
+        return loss, dW
     scores = X.dot(W) # (N,C)
     correct_scores = scores[np.arange(len(scores)),y]
     margins = np.maximum(0, scores - correct_scores[:,None] + 1)
@@ -102,10 +104,11 @@ def svm_loss_vectorized(W, X, y, reg):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     num_train = X.shape[0]
     margins[margins > 0] = 1
-    margins[np.arange(X.shape[0]),y ] = margins.sum(axis=1)
+    valid_margins_count = margins.sum(axis=1)
+    margins[np.arange(num_train),y] -= valid_margins_count
     
     dW = (X.T).dot(margins) / num_train    
-    dW = dW + reg * 2 * W
+    dW += reg * 2 * W
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     return loss, dW
